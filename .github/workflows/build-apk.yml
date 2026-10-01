@@ -10,14 +10,8 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Download project ZIP
+      - name: Checkout Repository
         uses: actions/checkout@v4
-
-      - name: Extract project
-        run: |
-          unzip -q NabdhAcademy-v5-APK-BUILD.zip
-          cd NabdhAcademy-v5
-          ls
 
       - name: Set up Java 17
         uses: actions/setup-java@v4
@@ -25,14 +19,13 @@ jobs:
           distribution: temurin
           java-version: '17'
 
-      - name: Set up Gradle
+      - name: Setup Gradle
         uses: gradle/actions/setup-gradle@v4
         with:
           gradle-version: '8.9'
 
       - name: Create local.properties
         run: |
-          cd NabdhAcademy-v5
           cat > local.properties <<'PROPS'
           sdk.dir=${ANDROID_HOME}
           SUPABASE_URL=${{ secrets.SUPABASE_URL }}
@@ -41,12 +34,12 @@ jobs:
 
       - name: Build APK
         run: |
-          cd NabdhAcademy-v5
-          gradle :app:assembleDebug --no-daemon
+          chmod +x gradlew
+          ./gradlew :app:assembleDebug --no-daemon
 
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
           name: nabdh-academy-debug-apk
-          path: NabdhAcademy-v5/app/build/outputs/apk/debug/app-debug.apk
+          path: app/build/outputs/apk/debug/app-debug.apk
           if-no-files-found: error
